@@ -50,17 +50,11 @@ def normalize_hand(hole_cards: str) -> str:
 
     We only need ranks (A, K, Q, J, T, 9,...2) and an 's' or 'o'.
     """
-    # 1. Extract cards (assuming the user might provide something like "AhKc"):
-    #    We expect two cards, each with rank + suit.
-    #    E.g. "Ah" = (A, h), "Kc" = (K, c)
-    
     pattern = re.findall(r'([AKQJT2-9][hcds])', hole_cards, re.IGNORECASE)
     if len(pattern) < 2:
-        # If user typed "A K" or something, try splitting on whitespace
         pattern = hole_cards.split()
 
     if len(pattern) != 2:
-        # Just in case
         return None
 
     card1, card2 = pattern[0], pattern[1]
