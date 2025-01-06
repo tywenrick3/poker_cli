@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import argparse
 
 def rule_of_2_and_4(outs: int, cards_left_to_see: int) -> float:
