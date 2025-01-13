@@ -5,12 +5,6 @@ import re
 import datetime
 import sys
 
-# ------------------------------------------------------------------------
-# 1. Data: Hand Ranges for Multiple Positions
-# ------------------------------------------------------------------------
-# In reality, you’d load these from a JSON or CSV file to allow easy customization.
-# These sets are *highly* simplified. Real ranges are more nuanced.
-
 RANGES = {
     # Under the Gun (tightest)
     "utg": {
@@ -18,7 +12,6 @@ RANGES = {
             "AA", "KK", "QQ", "JJ", "TT", "AKs", "AQs", "AJs", "KQs", "AKo"
         },
         "call": {
-            # For demonstration, let’s say we sometimes call small pockets in UTG
             "99", "88", "77", "66", "55", "44", "33", "22"
         },
     },
@@ -68,7 +61,7 @@ RANGES = {
             "AKs", "AQs", "AJs", "ATs", "KQs", "KJs", "QJs", "JTs", 
             "AKo", "AQo", "AJo", "KQo", "KJo", "QJo", 
             "T9s", "98s", "87s", "76s", 
-            "A9s", "A8s", "A5s"  # etc...
+            "A9s", "A8s", "A5s" 
         },
         "call": {
             "66", "55", "44", "33", "22",
@@ -88,18 +81,13 @@ RANGES = {
             "A9s", "KTs", "QTs", "J9s", "87s", "76s" 
         },
     },
-    # Big Blind
-    # In the big blind, you might call more often with good pot odds,
-    # so let's define bigger call sets. This is still simplified!
     "bb": {
         "raise": {
-            # Strong re-raise range
             "AA", "KK", "QQ", "JJ", "TT",
             "AKs", "AQs", "AJs", "KQs",
             "AKo", "AQo", "AJo", "KQo",
         },
         "call": {
-            # BB can defend wide
             "99", "88", "77", "66", "55", "44", "33", "22",
             "ATs", "KJs", "QJs", "JTs", "T9s", "98s", "87s", "76s",
             "A9s", "KTs", "QTs", "J9s", "T8s",
@@ -107,14 +95,8 @@ RANGES = {
     },
 }
 
-# ------------------------------------------------------------------------
-# 2. Helper Functions
-# ------------------------------------------------------------------------
 
 def normalize_hand(hole_cards: str) -> str:
-    """
-    Convert something like 'Ah Kc' or 'AsKd' into 'AKs'/'AKo'/'AA', etc.
-    """
     import re
     pattern = re.findall(r'([AKQJT2-9][hcds])', hole_cards, re.IGNORECASE)
     if len(pattern) < 2:
@@ -149,19 +131,6 @@ def normalize_hand(hole_cards: str) -> str:
 
 
 def get_preflop_suggestion(hand: str, position: str, stack_size: float, action_before: str) -> (str, str):
-    """
-    Return (suggested_action, explanation).
-    
-    hand: normalized hand (e.g. 'AKs')
-    position: e.g. 'utg', 'mp', 'co', 'btn', 'sb', 'bb'
-    stack_size: effective stack size in Big Blinds (BB)
-    action_before: 'none', 'raise', 'call', or '3bet' to indicate prior action.
-    
-    The logic is simplified. Real play depends on many factors:
-    - If short stack (< 20BB), might push/fold more often.
-    - If facing a raise, tighten up or 3-bet certain hands.
-    """
-    # If the hand is not recognized, default to fold
     if position not in RANGES:
         return ("fold", f"Position {position} not recognized in RANGES.")
 
@@ -214,11 +183,6 @@ def get_preflop_suggestion(hand: str, position: str, stack_size: float, action_b
 
 
 def get_recommended_raise_size(position: str, stack_size: float) -> float:
-    """
-    Suggest a raise size in Big Blinds.
-    For example, UTG: ~3x, CO: ~2.5x, BTN: ~2.2-2.5x, SB: 3x.
-    This is extremely simplified.
-    """
     if position in ["utg", "mp", "hj"]:
         return 3.0
     elif position == "co":
@@ -228,8 +192,6 @@ def get_recommended_raise_size(position: str, stack_size: float) -> float:
     elif position == "sb":
         return 3.0
     elif position == "bb":
-        # Typically you’d be defending, not raising first, 
-        # but let's say we do 3x if we do open in BB (unusual scenario).
         return 3.0
     else:
         return 2.5  # fallback
@@ -237,21 +199,11 @@ def get_recommended_raise_size(position: str, stack_size: float) -> float:
 
 def log_decision(cards: str, normalized: str, position: str, stack_size: float, action_before: str,
                  suggestion: str, explanation: str, filename="preflop_suggestions.csv"):
-    """
-    Append the decision to a CSV log file for later review.
-    """
     timestamp = datetime.datetime.now().isoformat()
     with open(filename, "a") as f:
         f.write(f"{timestamp},{cards},{normalized},{position},{stack_size},{action_before},{suggestion},{explanation}\n")
 
-# ------------------------------------------------------------------------
-# 3. Main CLI Function
-# ------------------------------------------------------------------------
-
 def run_interactive():
-    """
-    Interactive mode: Prompt the user for each piece of info step by step.
-    """
     print("=== Interactive Pre-Flop Advisor ===")
     cards = input("Enter your hole cards (e.g. 'Ah Kc'): ")
     position = input("Enter your position (utg/mp/hj/co/btn/sb/bb): ").lower()
@@ -353,7 +305,6 @@ def main():
         print(f"Recommended Size: ~{r_size:.1f}x BB")
     print(f"Reason: {explanation}")
 
-    # Log it
     log_decision(args.cards, normalized, args.position, args.stack_size,
                  args.action_before, suggestion, explanation)
 

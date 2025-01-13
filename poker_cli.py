@@ -2,14 +2,6 @@
 import argparse
 
 def rule_of_2_and_4(outs: int, cards_left_to_see: int) -> float:
-    """
-    Returns an approximate probability (as a decimal) of hitting 
-    at least one of your outs, based on the 'Rule of 2 and 4'.
-    - If 2 cards are yet to come, multiply outs by 4%.
-    - If 1 card is yet to come, multiply outs by 2%.
-    
-    e.g., if outs=9 and 2 cards to come, probability ~ 9 * 4% = 36% => 0.36
-    """
     if cards_left_to_see == 2:
         return min(1.0, outs * 0.04)  # 4% per out
     elif cards_left_to_see == 1:
@@ -19,20 +11,6 @@ def rule_of_2_and_4(outs: int, cards_left_to_see: int) -> float:
 
 
 def exact_probability_by_outs(outs: int, cards_left_to_see: int, visible_cards: int = 5) -> float:
-    """
-    Calculate the probability of hitting at least one of your outs 
-    in 'cards_left_to_see' draws, accounting (roughly) for visible cards.
-    
-    - outs: number of cards that improve your hand
-    - cards_left_to_see: typically 1 or 2
-    - visible_cards: number of already-seen cards (default 5 
-      for your 2 hole cards + 3 flop cards).
-    
-    Returns a decimal probability (0.0 to 1.0).
-    
-    NOTE: This is still a simplified approach that doesn't consider 
-    removal effects precisely, but it's closer than the raw “Rule of 2 and 4”.
-    """
     deck_size = 52 - visible_cards  # naive approach
     
     p_no_out = 1.0
@@ -43,10 +21,6 @@ def exact_probability_by_outs(outs: int, cards_left_to_see: int, visible_cards: 
 
 
 def pot_odds(pot_size: float, call_amount: float) -> float:
-    """
-    Returns pot odds as a ratio (e.g., 3.5 means 3.5:1).
-    That is: (pot_size + call_amount) / call_amount.
-    """
     return (pot_size + call_amount) / call_amount
 
 
@@ -104,8 +78,6 @@ def main():
             args.outs, args.cards_left_to_see, args.visible_cards
         )
 
-    # Convert probability to ratio (Odds Against)
-    # e.g. if probability is 0.25 (25%), odds against are 0.75 / 0.25 = 3:1
     odds_against = 0
     if win_probability < 1.0:
         odds_against = (1.0 - win_probability) / win_probability
